@@ -13,7 +13,8 @@ module Backend
         if Rails.env.development?
           origins "http://localhost:5173"
         else
-          origins ENV["FRONTEND_URL"]
+          frontend_url = ENV["FRONTEND_URL"]
+          origins frontend_url.present? ? frontend_url : "*"
         end
         resource "*", headers: :any, methods: [ :get, :post, :patch, :put, :delete, :options ]
       end
