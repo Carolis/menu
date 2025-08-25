@@ -69,4 +69,27 @@ cd frontend
 npm run test
 ```
 
+## Production Deployment (Railway)
+
+### Backend Deployment
+1. Create new Railway service, connect your repository
+2. Add required gems: `bundle add thruster rack-cors`
+3. Set environment variables in Railway dashboard:
+   - `RAILS_ENV=production`
+   - `SECRET_KEY_BASE=<generate with: rails secret>`
+   - `FRONTEND_URL=<your-frontend-public-railway-url>`
+4. Deploy automatically via git push
+
+### Frontend Deployment
+1. Create separate Railway service for frontend
+2. Add `.nvmrc` file with content: `20`
+3. Set environment variables:
+   - `VITE_API_URL=<your-backend-public-railway-url>/api/v1`
+4. Deploy automatically via git push
+
+### Railway Configuration Friendly Reminders! 
+- Use **public URLs** for CORS configuration
+- Node.js 20+ required for Vite 7
+- Thruster gem required for Rails 8 deployment
+
 ## API Endpoints (TBD)
