@@ -13,6 +13,4 @@ test:
 
 production:
   <<: *default
-  database: restaurant_menu_production
-  username: restaurant_menu
-  password: <%= ENV["RESTAURANT_MENU_DATABASE_PASSWORD"] %>
+  url: <%= ENV["DATABASE_URL"] %>
