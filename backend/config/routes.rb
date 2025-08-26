@@ -4,7 +4,7 @@ Rails.application.routes.draw do
       resources :menus do
         resources :menu_items, except: [ :index ]
       end
-      resources :menu_items, only: [ :index, :show, :update, :destroy ]
+      resources :menu_items
     end
   end
 end

@@ -3,27 +3,28 @@ class Api::V1::MenusController < ApplicationController
 
   def index
     @menus = Menu.includes(:menu_items).all
-    render json: @menus, include: :menu_items
+    render json: @menus, include: :menu_items, status: :ok
   end
 
   def show
-    render json: @menu, include: :menu_items
+    render json: @menu, include: :menu_items, status: :ok
   end
 
   def create
     @menu = Menu.new(menu_params)
+
     if @menu.save
-      render json: @menu, status: :created
+      render json: @menu, status: :created, location: api_v1_menu_url(@menu)
     else
-      render json: { errors: @menu.errors }, status: :unprocessable_entity
+      render json: { errors: @menu.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   def update
     if @menu.update(menu_params)
-      render json: @menu
+      render json: @menu, include: :menu_items, status: :ok
     else
-      render json: { errors: @menu.errors }, status: :unprocessable_entity
+      render json: { errors: @menu.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
@@ -36,9 +37,11 @@ class Api::V1::MenusController < ApplicationController
 
   def set_menu
     @menu = Menu.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "Menu not found" }, status: :not_found
   end
 
   def menu_params
-    params.require(:menu).permit(:name, menu_item_ids: [])
+    params.require(:menu).permit(:name)
   end
 end
