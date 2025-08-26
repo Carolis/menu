@@ -11,8 +11,16 @@ RSpec.describe "Api::V1::Menus", type: :request do
     end
 
     context "with menus" do
-      let!(:menu1) { create(:menu, :with_menu_items) }
-      let!(:menu2) { create(:menu) }
+      let!(:restaurant) { create(:restaurant) }
+      let!(:menu1) { restaurant.menus.create!(name: "lunch") }
+      let!(:menu2) { restaurant.menus.create!(name: "dinner") }
+      let!(:burger) { create(:menu_item, name: "Burger") }
+      let!(:salad) { create(:menu_item, name: "Salad") }
+
+      before do
+        menu1.menu_items << [ burger, salad ]
+        menu2.menu_items << burger
+      end
 
       it "returns all menus with menu items" do
         get "/api/v1/menus"
@@ -21,17 +29,24 @@ RSpec.describe "Api::V1::Menus", type: :request do
         json = JSON.parse(response.body)
         expect(json.length).to eq(2)
 
-        menu_with_items = json.find { |m| m["id"] == menu1.id }
-        expect(menu_with_items["menu_items"].length).to eq(2)
+        lunch_menu = json.find { |m| m["name"] == "lunch" }
+        expect(lunch_menu["menu_items"].length).to eq(2)
 
-        menu_without_items = json.find { |m| m["id"] == menu2.id }
-        expect(menu_without_items["menu_items"]).to eq([])
+        dinner_menu = json.find { |m| m["name"] == "dinner" }
+        expect(dinner_menu["menu_items"].length).to eq(1)
+        expect(dinner_menu["menu_items"][0]["name"]).to eq("Burger")
       end
     end
   end
 
   describe "GET /api/v1/menus/:id" do
-    let!(:menu) { create(:menu, :with_menu_items) }
+    let!(:restaurant) { create(:restaurant) }
+    let!(:menu) { restaurant.menus.create!(name: "lunch") }
+    let!(:menu_items) { create_list(:menu_item, 2) }
+
+    before do
+      menu.menu_items = menu_items
+    end
 
     it "returns specific menu with menu items" do
       get "/api/v1/menus/#{menu.id}"
