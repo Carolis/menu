@@ -5,12 +5,13 @@ default: &default
 
 development:
   <<: *default
-  database: restaurant_menu_development
+  database: restaurant_menu_app_development
 
 test:
   <<: *default
-  database: restaurant_menu_test
+  database: restaurant_menu_app_test
 
 production:
   <<: *default
+  database: restaurant_menu_app_production
   url: <%= ENV["DATABASE_URL"] %>
