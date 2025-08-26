@@ -20,15 +20,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_26_013747) do
     t.bigint "menu_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index [ "menu_id" ], name: "index_menu_items_on_menu_id"
-    t.index [ "name" ], name: "index_menu_items_on_name"
+    t.index ["menu_id"], name: "index_menu_items_on_menu_id"
+    t.index ["name"], name: "index_menu_items_on_name"
   end
 
   create_table "menus", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index [ "name" ], name: "index_menus_on_name"
+    t.index ["name"], name: "index_menus_on_name"
   end
 
   add_foreign_key "menu_items", "menus"

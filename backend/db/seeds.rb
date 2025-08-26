@@ -1,9 +1,25 @@
-# This file should ensure the existence of records required to run the application in every environment (production,
-# development, test). The code here should be idempotent so that it can be executed at any point in every environment.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Example:
-#
-#   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
-#     MovieGenre.find_or_create_by!(name: genre_name)
-#   end
+if Rails.env.development?
+  MenuItem.destroy_all
+  Menu.destroy_all
+end
+
+lunch_menu = Menu.create!(name: "Lunch Menu")
+dinner_menu = Menu.create!(name: "Dinner Menu")
+
+lunch_menu.menu_items.create!([
+  { name: "Classic Burger", price: 12.99 },
+  { name: "Chicken Caesar Salad", price: 10.99 },
+  { name: "Fish & Chips", price: 14.99 },
+  { name: "Veggie Wrap", price: 9.99 }
+])
+
+dinner_menu.menu_items.create!([
+  { name: "Ribeye Steak", price: 28.99 },
+  { name: "Grilled Salmon", price: 22.99 },
+  { name: "Pasta Carbonara", price: 16.99 },
+  { name: "Roasted Chicken", price: 19.99 }
+])
+
+puts "Created #{Menu.count} menus with #{MenuItem.count} menu items total"
+puts "Lunch Menu has #{lunch_menu.menu_items.count} items"
+puts "Dinner Menu has #{dinner_menu.menu_items.count} items"
