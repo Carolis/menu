@@ -1,6 +1,6 @@
 # Restaurant Menu
 
-[Online Interface Demo](https://monorepo-railway-frontend-production.up.railway.app)
+[Online Interface Demo](https://menu-frontend-production.up.railway.app)
 
 [API Production URL](https://menu-backend-production-bf53.up.railway.app/api/v1/restaurants)
 
