@@ -8,6 +8,8 @@ Rails.application.routes.draw do
         resources :menu_items, except: [ :index ]
       end
       resources :menu_items
+
+      post "import/restaurants", to: "imports#create"
     end
   end
 end
