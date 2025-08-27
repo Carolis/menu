@@ -16,7 +16,7 @@ class Api::V1::MenuItemsController < ApplicationController
     if @menu_item.save
       render json: @menu_item, include: :menus, status: :created, location: api_v1_menu_item_url(@menu_item)
     else
-      render json: { errors: @menu_item.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: @menu_item.errors.full_messages }, status: :unprocessable_content
     end
   end
 
@@ -24,7 +24,7 @@ class Api::V1::MenuItemsController < ApplicationController
     if @menu_item.update(menu_item_params)
       render json: @menu_item, include: :menus, status: :ok
     else
-      render json: { errors: @menu_item.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: @menu_item.errors.full_messages }, status: :unprocessable_content
     end
   end
 
