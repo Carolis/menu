@@ -1,6 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe "Api::V1::Imports", type: :request do
+  let(:valid_credentials) { { username: 'admin', password: 'password' } }
+  let(:auth_header) do
+    ActionController::HttpAuthentication::Basic.encode_credentials(
+      valid_credentials[:username],
+      valid_credentials[:password]
+    )
+  end
   let(:valid_json_data) do
     {
       "restaurants" => [
@@ -27,10 +34,34 @@ RSpec.describe "Api::V1::Imports", type: :request do
   end
 
   describe "POST /api/v1/import/restaurants" do
-    context "with valid JSON data" do
+    context "without authentication" do
+      it "requires authentication" do
+        post "/api/v1/import/restaurants", params: { data: valid_json_data }
+
+        expect(response).to have_http_status(:unauthorized)
+        expect(response.body).to include("HTTP Basic: Access denied")
+      end
+    end
+
+    context "with invalid authentication" do
+      it "rejects invalid credentials" do
+        invalid_auth = ActionController::HttpAuthentication::Basic.encode_credentials('wrong', 'wrong')
+
+        post "/api/v1/import/restaurants",
+             params: { data: valid_json_data },
+             headers: { 'Authorization' => invalid_auth }
+
+        expect(response).to have_http_status(:unauthorized)
+        expect(response.body).to include("HTTP Basic: Access denied")
+      end
+    end
+
+    context "with valid authentication and data" do
       it "imports restaurants successfully" do
         expect {
-          post "/api/v1/import/restaurants", params: { data: valid_json_data }
+          post "/api/v1/import/restaurants",
+               params: { data: valid_json_data },
+               headers: { 'Authorization' => auth_header }
         }.to change(Restaurant, :count).by(1)
           .and change(Menu, :count).by(1)
           .and change(MenuItem, :count).by(1)
@@ -43,7 +74,9 @@ RSpec.describe "Api::V1::Imports", type: :request do
       end
 
       it "returns detailed logs" do
-        post "/api/v1/import/restaurants", params: { data: valid_json_data }
+        post "/api/v1/import/restaurants",
+             params: { data: valid_json_data },
+             headers: { 'Authorization' => auth_header }
 
         json = JSON.parse(response.body)
         expect(json["logs"].first).to include("type", "message", "timestamp")
@@ -62,7 +95,9 @@ RSpec.describe "Api::V1::Imports", type: :request do
         uploaded_file = Rack::Test::UploadedFile.new(temp_file, "application/json")
 
         expect {
-          post "/api/v1/import/restaurants", params: { file: uploaded_file }
+          post "/api/v1/import/restaurants",
+               params: { file: uploaded_file },
+               headers: { 'Authorization' => auth_header }
         }.to change(Restaurant, :count).by(1)
 
         expect(response).to have_http_status(201)
@@ -73,7 +108,7 @@ RSpec.describe "Api::V1::Imports", type: :request do
 
     context "with invalid data" do
       it "returns error for missing data" do
-        post "/api/v1/import/restaurants"
+        post "/api/v1/import/restaurants", headers: { 'Authorization' => auth_header }
 
         expect(response).to have_http_status(400)
         json = JSON.parse(response.body)
@@ -81,7 +116,9 @@ RSpec.describe "Api::V1::Imports", type: :request do
       end
 
       it "handles invalid JSON" do
-        post "/api/v1/import/restaurants", params: { data: "invalid json" }
+        post "/api/v1/import/restaurants",
+             params: { data: "invalid json" },
+             headers: { 'Authorization' => auth_header }
 
         expect(response).to have_http_status(422)
         json = JSON.parse(response.body)
@@ -91,7 +128,9 @@ RSpec.describe "Api::V1::Imports", type: :request do
       it "handles validation errors" do
         invalid_data = { "restaurants" => [ { "menus" => [] } ] }
 
-        post "/api/v1/import/restaurants", params: { data: invalid_data }
+        post "/api/v1/import/restaurants",
+             params: { data: invalid_data },
+             headers: { 'Authorization' => auth_header }
 
         expect(response).to have_http_status(422)
         json = JSON.parse(response.body)

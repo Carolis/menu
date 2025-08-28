@@ -10,6 +10,7 @@ Rails.application.routes.draw do
       resources :menu_items
 
       post "import/restaurants", to: "imports#create"
+      post "auth/verify", to: "sessions#verify"
     end
   end
 end

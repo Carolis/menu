@@ -1,4 +1,6 @@
 class Api::V1::ImportsController < ApplicationController
+  before_action :authenticate_admin
+
   def create
     begin
       if params[:file].present?
