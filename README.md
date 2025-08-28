@@ -1,5 +1,7 @@
 # Restaurant Menu
 
+[Kanban Project Issue Roadmap](https://github.com/users/Carolis/projects/2/views/1?sortedBy%5Bdirection%5D=asc&sortedBy%5BcolumnId%5D=Labels)
+
 [Online Interface Demo](https://menu-frontend-production.up.railway.app)
 
 [API Production URL](https://menu-backend-production-bf53.up.railway.app/api/v1/restaurants)

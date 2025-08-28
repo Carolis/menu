@@ -1,24 +1,15 @@
-# README
+## Local Development Setup
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
 
-Things you may want to cover:
+```bash
+bundle install
 
-* Ruby version
+rails db:create
+rails db:migrate
 
-* System dependencies
+rails db:seed
 
-* Configuration
+rails server -p 3001
+```
 
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+Backend will be available at: `http://localhost:3001`
