@@ -1,5 +1,6 @@
 class RestaurantImportService
   include ActiveModel::Model
+  include SecurityHelpers
 
   def initialize
     @logs = []
@@ -65,7 +66,7 @@ class RestaurantImportService
   end
 
   def import_restaurant(restaurant_data)
-    restaurant_name = restaurant_data["name"]&.strip
+    restaurant_name = sanitize_html(restaurant_data["name"]&.strip)
 
     if restaurant_name.blank?
       @errors << "Restaurant name is required"
@@ -91,7 +92,7 @@ class RestaurantImportService
   end
 
   def import_menu(restaurant, menu_data)
-    menu_name = menu_data["name"]&.strip
+    menu_name = sanitize_html(menu_data["name"]&.strip)
 
     if menu_name.blank?
       log_warning("Skipping menu without name for restaurant #{restaurant.name}")
@@ -115,7 +116,7 @@ class RestaurantImportService
     processed_items = Set.new
 
     items_data.each do |item_data|
-      item_name = item_data["name"]&.strip
+      item_name = sanitize_html(item_data["name"]&.strip)
       price = item_data["price"]
 
       if item_name.blank?
