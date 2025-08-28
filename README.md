@@ -83,24 +83,53 @@ npm run test
 
 # API Endpoint usage examples
 
-## Get all restaurants
+## Get all restaurants (No Auth required)
 
 ```
 curl "https://menu-backend-production-bf53.up.railway.app/api/v1/restaurants" | jq '.[0] | {name: .name, menus_count: (.menus | length)}'
 ```
 
-## Get specific restaurant
+## Get specific restaurant (No Auth required)
 
 ```
 curl "https://menu-backend-production-bf53.up.railway.app/api/v1/restaurants/1" | jq '{name: .name, menus: [.menus[] | {name: .name, items: [.menu_items[].name]}]}'
 ```
 
-## Create new restaurant
+## Create new restaurant (No Auth required)
 
 ```
 curl -X POST "https://menu-backend-production-bf53.up.railway.app/api/v1/restaurants" \
   -H "Content-Type: application/json" \
   -d '{"restaurant": {"name": "Test Production Restaurant"}}'
+```
+
+## Admin Auth
+
+Admin endpoints require HTTP Basic Authentication. Default credentials for the DEMO:
+
+- Username: `admin`
+- Password: `password`
+
+Set custom credentials via environment variables:
+
+- `ADMIN_USERNAME` - Custom admin username
+- `ADMIN_PASSWORD` - Custom admin password
+
+### Test Admin Authentication
+
+```
+curl -X POST "https://menu-backend-production-bf53.up.railway.app/api/v1/auth/verify" \
+  -u admin:password \
+  -H "Content-Type: application/json"
+```
+
+Expected response:
+
+```json
+{
+  "authenticated": true,
+  "message": "Authentication successful"
+}
 ```
 
 ## Get all menus
@@ -121,11 +150,15 @@ curl "https://menu-backend-production-bf53.up.railway.app/api/v1/menus/1" | jq '
 curl "https://menu-backend-production-bf53.up.railway.app/api/v1/menu_items" | jq '[.[] | {name: .name, price: .price, appears_on_menus: [.menus[].name]}]'
 ```
 
+## JSON Import (Requires Auth)
 
-## Test with valid JSON data
+**All import endpoints require admin authentication**
 
-```
+### Test with valid JSON data
+
+```bash
 curl -X POST "https://menu-backend-production-bf53.up.railway.app/api/v1/import/restaurants" \
+  -u admin:password \
   -H "Content-Type: application/json" \
   -d '{
     "data": {
@@ -146,21 +179,33 @@ curl -X POST "https://menu-backend-production-bf53.up.railway.app/api/v1/import/
   }' | jq '{success: .success, summary: .summary, logs: .logs | length}'
 ```
 
-## Test error handling - missing restaurant name
+### Test error handling - missing restaurant name
 
-```
+```bash
 curl -X POST "https://menu-backend-production-bf53.up.railway.app/api/v1/import/restaurants" \
+  -u admin:password \
   -H "Content-Type: application/json" \
   -d '{"data": {"restaurants": [{"menus": []}]}}' | jq '{success: .success, errors: .errors}'
 ```
 
-## Test error handling - invalid JSON
+### Test error handling - invalid JSON
 
-```
+```bash
 curl -X POST "https://menu-backend-production-bf53.up.railway.app/api/v1/import/restaurants" \
+  -u admin:password \
   -H "Content-Type: application/json" \
   -d '{"data": "invalid json structure"}' | jq '{success: .success, error: .error}'
 ```
+
+### Test without authentication (should fail)
+
+```bash
+curl -X POST "https://menu-backend-production-bf53.up.railway.app/api/v1/import/restaurants" \
+  -H "Content-Type: application/json" \
+  -d '{"data": {"restaurants": []}}'
+```
+
+Expected response: `HTTP Basic: Access denied.`
 
 ## Create a test file
 
@@ -177,14 +222,12 @@ echo '{
 }' > test_restaurant.json
 ```
 
-## Upload the file
+## Upload the file (with authentication)
 
-```
-
+```bash
 curl -X POST "https://menu-backend-production-bf53.up.railway.app/api/v1/import/restaurants" \
- -F "file=@test_restaurant.json" | jq '{success: .success, summary: .summary}'
-
-
+  -u admin:password \
+  -F "file=@test_restaurant.json" | jq '{success: .success, summary: .summary}'
 ```
 
 ## Production Deployment Instructions (Railway)

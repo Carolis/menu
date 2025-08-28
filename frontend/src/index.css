@@ -3,3 +3,7 @@
 * {
   font-family: 'Poppins', sans-serif;
 }
+
+html {
+  overflow-y: scroll;
+}
