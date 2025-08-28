@@ -8,17 +8,6 @@ Bundler.require(*Rails.groups)
 
 module Backend
   class Application < Rails::Application
-    config.middleware.insert_before 0, Rack::Cors do
-      allow do
-        if Rails.env.development?
-          origins "http://localhost:5173"
-        else
-          frontend_url = ENV["FRONTEND_URL"]
-          origins frontend_url.present? ? frontend_url : "*"
-        end
-        resource "*", headers: :any, methods: [ :get, :post, :patch, :put, :delete, :options ]
-      end
-    end
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.0
 
