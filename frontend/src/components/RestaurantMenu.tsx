@@ -1,5 +1,7 @@
-import React from "react"
-import { type Restaurant } from "../services/restaurantService"
+import React, { useState, useEffect } from "react"
+import { type Restaurant, type Review, restaurantService } from "../services/restaurantService"
+import ReviewList from "./ReviewList"
+import ReviewForm from "./ReviewForm"
 
 interface RestaurantMenuProps {
   restaurant: Restaurant
@@ -10,6 +12,41 @@ const RestaurantMenu: React.FC<RestaurantMenuProps> = ({
   restaurant,
   onBack,
 }) => {
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [isLoadingReviews, setIsLoadingReviews] = useState(true)
+  const [showReviewForm, setShowReviewForm] = useState(false)
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false)
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        setIsLoadingReviews(true)
+        const reviewData = await restaurantService.getReviews(restaurant.id)
+        setReviews(reviewData)
+      } catch (error) {
+        console.error("Error fetching reviews:", error)
+      } finally {
+        setIsLoadingReviews(false)
+      }
+    }
+
+    fetchReviews()
+  }, [restaurant.id])
+
+  const handleSubmitReview = async (reviewData: Omit<Review, 'id' | 'restaurant_id' | 'created_at' | 'updated_at'>) => {
+    setIsSubmittingReview(true)
+    try {
+      const newReview = await restaurantService.createReview(restaurant.id, reviewData)
+      setReviews(prev => [newReview, ...prev])
+      setShowReviewForm(false)
+    } catch (error) {
+      console.error("Error submitting review:", error)
+      throw error
+    } finally {
+      setIsSubmittingReview(false)
+    }
+  }
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
@@ -85,6 +122,35 @@ const RestaurantMenu: React.FC<RestaurantMenuProps> = ({
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Reviews Section */}
+      <div className="mt-12 space-y-6">
+        <div className="bg-gray-900 rounded-lg p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-white">Customer Reviews</h2>
+            {!showReviewForm && (
+              <button
+                onClick={() => setShowReviewForm(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                Write a Review
+              </button>
+            )}
+          </div>
+
+          {showReviewForm ? (
+            <div className="mb-8">
+              <ReviewForm
+                onSubmit={handleSubmitReview}
+                onCancel={() => setShowReviewForm(false)}
+                isSubmitting={isSubmittingReview}
+              />
+            </div>
+          ) : null}
+
+          <ReviewList reviews={reviews} isLoading={isLoadingReviews} />
+        </div>
       </div>
     </div>
   )

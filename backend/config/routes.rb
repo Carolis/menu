@@ -3,6 +3,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :restaurants do
         resources :menus, except: [ :index ]
+        resources :reviews
       end
       resources :menus do
         resources :menu_items, except: [ :index ]

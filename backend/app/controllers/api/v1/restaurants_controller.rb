@@ -3,11 +3,21 @@ class Api::V1::RestaurantsController < ApplicationController
 
   def index
     @restaurants = Restaurant.includes(menus: :menu_items).all
-    render json: @restaurants, include: { menus: { include: :menu_items } }, status: :ok
+    render json: @restaurants.as_json(
+      include: { menus: { include: :menu_items } },
+      methods: [ :average_rating, :total_reviews ]
+    ), status: :ok
   end
 
   def show
-    render json: @restaurant, include: { menus: { include: :menu_items } }, status: :ok
+    @restaurant = Restaurant.includes(menus: :menu_items, reviews: []).find(params[:id])
+    render json: @restaurant.as_json(
+      include: {
+        menus: { include: :menu_items },
+        reviews: { only: [ :id, :rating, :reviewer_name, :comment, :created_at ] }
+      },
+      methods: [ :average_rating, :total_reviews ]
+    ), status: :ok
   end
 
   def create

@@ -230,6 +230,29 @@ curl -X POST "https://menu-backend-production-bf53.up.railway.app/api/v1/import/
   -F "file=@test_restaurant.json" | jq '{success: .success, summary: .summary}'
 ```
 
+# Some more examples for creating objects with each model:
+
+  # Restaurant
+  restaurant = Restaurant.create(name: "Pizza Palace")
+
+  # Menu
+  menu = Menu.create(name: "Dinner Menu", restaurant: restaurant)
+
+  # MenuItem
+  menu_item = MenuItem.create(name: "Margherita Pizza", price: 12.99, description: "Classic tomato and mozzarella")
+
+  # MenuItemAssignment (joins menu and menu_item)
+  assignment = MenuItemAssignment.create(menu: menu, menu_item: menu_item)
+
+  # Review
+  review = Review.create(
+    restaurant: restaurant,
+    reviewer_name: "John Doe",
+    reviewer_email: "john@example.com",
+    rating: 5,
+    comment: "Amazing pizza!"
+  )
+
 ## Production Deployment Instructions (Railway)
 
 ### Backend Deployment
