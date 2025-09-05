@@ -1,5 +1,6 @@
-import React from "react"
-import { type Restaurant } from "../services/restaurantService"
+import React, { useState, useMemo } from "react"
+import { type Restaurant, type MenuItem } from "../services/restaurantService"
+import MenuItemFilters, { type FilterOptions } from "./MenuItemFilters"
 
 interface RestaurantMenuProps {
   restaurant: Restaurant
@@ -10,6 +11,46 @@ const RestaurantMenu: React.FC<RestaurantMenuProps> = ({
   restaurant,
   onBack,
 }) => {
+  const [filters, setFilters] = useState<FilterOptions>({
+    name: "",
+    minPrice: "",
+    maxPrice: "",
+  })
+
+  const handleClearFilters = () => {
+    setFilters({
+      name: "",
+      minPrice: "",
+      maxPrice: "",
+    })
+  }
+
+  const filterMenuItems = (items: MenuItem[]): MenuItem[] => {
+    return items.filter((item) => {
+      if (filters.name && !item.name.toLowerCase().includes(filters.name.toLowerCase())) {
+        return false
+      }
+      
+      const price = parseFloat(item.price)
+      
+      if (filters.minPrice && price < parseFloat(filters.minPrice)) {
+        return false
+      }
+      
+      if (filters.maxPrice && price > parseFloat(filters.maxPrice)) {
+        return false
+      }
+      
+      return true
+    })
+  }
+
+  const filteredMenus = useMemo(() => {
+    return restaurant.menus.map((menu) => ({
+      ...menu,
+      menu_items: filterMenuItems(menu.menu_items),
+    }))
+  }, [restaurant.menus, filters])
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
@@ -41,8 +82,14 @@ const RestaurantMenu: React.FC<RestaurantMenuProps> = ({
         </div>
       </div>
 
+      <MenuItemFilters
+        filters={filters}
+        onFiltersChange={setFilters}
+        onClearFilters={handleClearFilters}
+      />
+
       <div className="space-y-8">
-        {restaurant.menus.map((menu) => (
+        {filteredMenus.map((menu) => (
           <div
             key={menu.id}
             className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"

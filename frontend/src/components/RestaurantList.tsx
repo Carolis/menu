@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useCallback } from "react"
 import {
   type Restaurant,
   restaurantService,
 } from "../services/restaurantService"
 import RestaurantCard from "./RestaurantCard"
+import SearchBar from "./SearchBar"
 
 interface RestaurantListProps {
   onRestaurantSelect: (restaurant: Restaurant) => void
@@ -15,24 +16,31 @@ const RestaurantList: React.FC<RestaurantListProps> = ({
   const [restaurants, setRestaurants] = useState<Restaurant[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState("")
+
+  const fetchRestaurants = useCallback(async (search?: string) => {
+    try {
+      setLoading(true)
+      const data = await restaurantService.getAllRestaurants(
+        search ? { name: search } : undefined
+      )
+      setRestaurants(data)
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to load restaurants"
+      )
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
-    const fetchRestaurants = async () => {
-      try {
-        setLoading(true)
-        const data = await restaurantService.getAllRestaurants()
-        setRestaurants(data)
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to load restaurants"
-        )
-      } finally {
-        setLoading(false)
-      }
-    }
+    const timeoutId = setTimeout(() => {
+      fetchRestaurants(searchTerm)
+    }, 300)
 
-    fetchRestaurants()
-  }, [])
+    return () => clearTimeout(timeoutId)
+  }, [searchTerm, fetchRestaurants])
 
   if (loading) {
     return (
@@ -83,6 +91,15 @@ const RestaurantList: React.FC<RestaurantListProps> = ({
         <p className="text-gray-600">
           Discover POPular food all around the world!
         </p>
+      </div>
+
+      <div className="mb-6">
+        <SearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search restaurants..."
+          className="max-w-md"
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

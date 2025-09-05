@@ -2,7 +2,11 @@ class Api::V1::MenuItemsController < ApplicationController
   before_action :set_menu_item, only: [ :show, :update, :destroy ]
 
   def index
-    @menu_items = MenuItem.includes(:menus).all
+    @menu_items = MenuItem.includes(:menus)
+                          .search_by_name(params[:name])
+                          .price_range(params[:min_price], params[:max_price])
+                          .by_restaurant(params[:restaurant_id])
+                          .by_menu(params[:menu_id])
     render json: @menu_items, include: :menus, status: :ok
   end
 

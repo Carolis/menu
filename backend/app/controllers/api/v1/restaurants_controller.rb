@@ -2,7 +2,8 @@ class Api::V1::RestaurantsController < ApplicationController
   before_action :set_restaurant, only: [ :show, :update, :destroy ]
 
   def index
-    @restaurants = Restaurant.includes(menus: :menu_items).all
+    @restaurants = Restaurant.includes(menus: :menu_items)
+                            .search_by_name(params[:name])
     render json: @restaurants, include: { menus: { include: :menu_items } }, status: :ok
   end
 
